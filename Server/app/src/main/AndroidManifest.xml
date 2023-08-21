@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.atakan.mainserver"
+    xmlns:tools="http://schemas.android.com/tools">
+    <queries>
+        <package android:name="com.atakan.mainclient" />
+    </queries>
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MainServer"
+        tools:targetApi="31">
+        <activity
+            android:name=".presentation.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MainServer">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name=".service.ServerService"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="aidl" />
+                <action android:name="messenger" />
+            </intent-filter>
+        </service>
+        <receiver android:name=".service.BroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.atakan.mainclient" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
