@@ -1,26 +1,31 @@
 package com.atakan.mainclient.presentation
 
-import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.atakan.mainclient.presentation.currency.screen.AIDL.AIDLScreen
-import com.atakan.mainclient.presentation.currency.screen.broadcast.BroadcastScreen
-import com.atakan.mainclient.presentation.currency.screen.main.MainScreen
-import com.atakan.mainclient.presentation.currency.screen.messenger.MessengerScreen
+import com.atakan.mainclient.presentation.screen.main_screen.MainScreen
 import com.atakan.mainclient.presentation.theme.MainClientTheme
+import com.atakan.mainclient.presentation.view_model.ImageViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val REQUEST_IMAGE_PICK = 2
+
+    private lateinit var image: Bitmap
+
+    @Inject
+    lateinit var viewModel: ImageViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -30,14 +35,24 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Hello()
+                    MainScreen(pickImage = this@MainActivity::pickImageFromGallery)
+
                 }
             }
         }
     }
-}
 
-@Composable
-fun Hello() {
-    
+    private fun pickImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(intent, REQUEST_IMAGE_PICK)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE_PICK && resultCode == RESULT_OK && data != null) {
+            val selectedImageUri = data.data
+            image = MediaStore.Images.Media.getBitmap(contentResolver, selectedImageUri)
+            viewModel.refreshData(image)
+        }
+    }
 }

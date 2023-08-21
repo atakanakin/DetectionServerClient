@@ -1,35 +1,6 @@
 package com.atakan.mainclient.service
 
-import com.atakan.mainclient.common.Resource
-import com.atakan.mainclient.domain.model.Currency
-import com.atakan.mainclient.domain.use_case.GetCurrencyUseCase
-import com.atakan.mainclient.presentation.currency.CurrencyViewModel
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Process
-import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.lifecycle.Observer
-import com.atakan.mainclient.presentation.MainActivity
-import com.atakan.mainclient.presentation.currency.screen.ServiceViewModel
-import com.atakan.mainserver.IIPCExample
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-
+/*
 @AndroidEntryPoint
 class AIDLService : Service() {
     @Inject
@@ -214,6 +185,7 @@ class AIDLService : Service() {
         super.onDestroy()
 
     }
+
     // Method to send data to the server application
     fun sendDataToServer() {
         Log.d("AIDL", "isHEre")
@@ -249,3 +221,6 @@ class AIDLService : Service() {
         }
     }
 }
+
+
+ */

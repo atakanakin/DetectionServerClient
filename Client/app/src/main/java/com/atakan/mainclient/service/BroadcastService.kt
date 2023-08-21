@@ -1,39 +1,6 @@
 package com.atakan.mainclient.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
-import android.content.ComponentName
-import android.content.Intent
-import android.os.Handler
-import android.os.IBinder
-import android.os.Process
-import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.lifecycle.Observer
-import com.atakan.mainclient.common.Constants.CURR1
-import com.atakan.mainclient.common.Constants.CURR2
-import com.atakan.mainclient.common.Constants.CURR3
-import com.atakan.mainclient.common.Constants.PACKAGE_NAME
-import com.atakan.mainclient.common.Constants.PID
-import com.atakan.mainclient.common.Constants.RATE1
-import com.atakan.mainclient.common.Constants.RATE2
-import com.atakan.mainclient.common.Constants.RATE3
-import com.atakan.mainclient.common.Constants.TIME
-import com.atakan.mainclient.common.Resource
-import com.atakan.mainclient.domain.model.Currency
-import com.atakan.mainclient.domain.use_case.GetCurrencyUseCase
-import com.atakan.mainclient.presentation.MainActivity
-import com.atakan.mainclient.presentation.currency.CurrencyViewModel
-import com.atakan.mainclient.presentation.currency.screen.ServiceViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
+/*
 
 @AndroidEntryPoint
 class BroadcastService : Service() {
@@ -204,3 +171,5 @@ class BroadcastService : Service() {
         }
     }
 }
+
+ */
