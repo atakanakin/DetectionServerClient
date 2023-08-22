@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.atakan.mainserver'
+    namespace 'com.atakan.detectionserver'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.atakan.mainserver"
+        applicationId "com.atakan.detectionserver"
         minSdk 24
         targetSdk 33
         versionCode 1
@@ -89,6 +89,9 @@ dependencies {
     kapt 'com.google.dagger:hilt-compiler:2.47'
     kapt "com.google.dagger:hilt-android-compiler:2.47"
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0-alpha01'
+
+    // Face Detection Google
+    implementation 'com.google.mlkit:face-detection:16.1.5'
 }
 
 kapt {

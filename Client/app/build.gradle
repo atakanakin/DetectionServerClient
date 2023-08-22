@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.atakan.mainclient'
+    namespace 'com.atakan.detectionclient'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.atakan.mainclient"
+        applicationId "com.atakan.detectionclient"
         minSdk 24
         versionCode 1
         versionName "1.0"

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.atakan.mainclient"
+    package="com.atakan.detectionclient"
     xmlns:tools="http://schemas.android.com/tools">
     <queries>
-        <package android:name="com.atakan.mainserver" />
+        <package android:name="com.atakan.detectionserver" />
     </queries>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
@@ -31,9 +31,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
-
+        <service
+            android:name=".service.MessengerService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>
