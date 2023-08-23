@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
@@ -98,5 +99,20 @@ fun MainScreen(
         }) {
             Text("Send")
         }
+        Button(onClick = {
+            if(emptyState!!){
+                viewModel.refreshData(viewModel.imageLive.value?.rotate(90f)!!)
+            }
+            else{
+                println("No Image Selected")
+            }
+        }) {
+            Text(text = "Rotate")
+        }
     }
+}
+
+fun Bitmap.rotate(degrees: Float): Bitmap {
+    val matrix = Matrix().apply { postRotate(degrees) }
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
 }

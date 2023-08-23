@@ -15,6 +15,7 @@ import com.atakan.detectionserver.constants.Constants.IMG_RECREATED
 
 import com.atakan.detectionserver.data.model.ImageData
 import com.atakan.detectionserver.presentation.ImageViewModel
+import com.atakan.detectionserver.utilities.ImageUtils.applyBlur
 import com.atakan.detectionserver.utilities.applyBlurToBitmap
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
@@ -92,7 +93,7 @@ class ServerService : Service() {
 
             runBlocking {
                 println("inside")
-                mutableBitmap = applyBlurToBitmap(incData.image, faceDetector())
+                mutableBitmap = applyBlur(applicationContext, incData.image, faceDetector())
                 viewModel.refreshData(mutableBitmap)
                 println("inside2")
             }

@@ -97,6 +97,9 @@ dependencies {
 
     // Glide Compose
     implementation "com.github.bumptech.glide:compose:1.0.0-alpha.1"
+
+    //Blur
+    implementation 'io.github.hokofly:hoko-blur:1.5.0'
 }
 
 kapt {
