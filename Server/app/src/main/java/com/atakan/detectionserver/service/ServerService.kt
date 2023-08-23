@@ -16,7 +16,9 @@ import com.atakan.detectionserver.constants.Constants.IMG_RECREATED
 import com.atakan.detectionserver.data.model.ImageData
 import com.atakan.detectionserver.presentation.ImageViewModel
 import com.atakan.detectionserver.utilities.applyBlurToBitmap
+import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +26,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -41,6 +44,10 @@ class ServerService : Service() {
     // Client might have sent an empty data
     private val NOT_SENT = "Not sent!"
 
+    lateinit var incData: ImageData
+
+    lateinit var mutableBitmap: Bitmap
+
     //val viewModel =
 
     // Messenger IPC - Messenger object contains binder to send to client
@@ -48,18 +55,19 @@ class ServerService : Service() {
 
     // Messenger IPC - Message Handler
     internal inner class IncomingHandler : Handler() {
-        lateinit var mutableBitmap: Bitmap
+
 
 
         override fun handleMessage(msgx: Message) {
             super.handleMessage(msgx)
             // Get message from client. Save recent connected client info.
             val receivedBundle = msgx.data
-            val incData = ImageData(
+             incData = ImageData(
                 image = receivedBundle.getParcelable(IMAGE)!!,
                 action = receivedBundle.getString(ACTION)!!,
                 method = "Messenger"
             )
+            viewModel.refreshData(incData.image)
 
             // Send message to the client. The message contains server info
 
@@ -80,23 +88,34 @@ class ServerService : Service() {
 
             bundle.putString(ACTION, "çalış")
 
-            val result = detector.process(image)
-            println("atakan"+result.isComplete)
-            result.continueWith{
-                mutableBitmap = applyBlurToBitmap(incData.image, it.result)
-                println("aftre")
+            println("atakan")
+
+            runBlocking {
+                println("inside")
+                mutableBitmap = applyBlurToBitmap(incData.image, faceDetector())
                 viewModel.refreshData(mutableBitmap)
-                bundle.putParcelable(IMG_RECREATED, viewModel.imageLive.value)
-                message.data = bundle
-                println(msgx.data)
-                println(msgx.replyTo)
-                msgx.replyTo.send(message)
+                println("inside2")
             }
 
+            println(mutableBitmap == null)
+
+            println("after")
+
+            bundle.putParcelable(IMG_RECREATED, mutableBitmap)
+            message.data = bundle
+            println(msgx.data)
+            println(msgx.replyTo)
+            msgx.replyTo.send(message)
 
             println("completed")
             Log.d("Messenger", "Package Received.")
         }
+    }
+
+    suspend fun faceDetector (): MutableList<Face> {
+        val image = InputImage.fromBitmap(incData.image, 0)
+
+        return detector.process(image).await()
     }
 
     // AIDL IPC - Binder object to pass to the client

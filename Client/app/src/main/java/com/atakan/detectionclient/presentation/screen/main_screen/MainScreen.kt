@@ -2,6 +2,10 @@ package com.atakan.detectionclient.presentation.screen.main_screen
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.ExifInterface
+import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +31,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakan.detectionclient.presentation.view_model.ImageViewModel
 import com.atakan.detectionclient.presentation.view_model.ServiceViewModel
 import com.atakan.detectionclient.service.MessengerService
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import java.io.IOException
+import java.io.InputStream
 
 @Composable
 fun MessengerService(context: Context) {
@@ -45,6 +54,7 @@ fun MessengerService(context: Context) {
 }
 
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MainScreen(
     context: Context,
@@ -55,17 +65,14 @@ fun MainScreen(
     val imageState by viewModel.imageLive.observeAsState()
     val emptyState by viewModel.isEmpty.observeAsState()
 
-    Column() {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         MessengerService(context = context)
-        Box(modifier = Modifier
-            .height(300.dp)
-            .fillMaxWidth()){
+        Box(modifier = Modifier.height(600.dp)){
             if(emptyState!!){
-                androidx.compose.foundation.Image(
-                    bitmap = imageState!!.asImageBitmap(),
-                    contentDescription = "Chosen Image",
-                    modifier = Modifier.fillMaxSize() // adjust the modifier as needed
-                )
+                GlideImage(model = imageState, contentDescription = "null",
+                    modifier = Modifier.fillMaxSize())
             }
             else{
                 Box(modifier = Modifier

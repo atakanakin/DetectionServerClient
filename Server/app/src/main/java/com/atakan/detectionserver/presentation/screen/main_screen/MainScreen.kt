@@ -22,7 +22,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.atakan.detectionserver.presentation.ImageViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MainScreen(viewModel: ImageViewModel = hiltViewModel(), context: Context) {
     val imageState by viewModel.imageLive.observeAsState()
@@ -36,11 +39,9 @@ fun MainScreen(viewModel: ImageViewModel = hiltViewModel(), context: Context) {
                 .fillMaxWidth()
         ) {
             if (emptyState!!) {
-                Image(
-                    bitmap = imageState!!.asImageBitmap(),
-                    contentDescription = "Chosen Image",
-                    modifier = Modifier.fillMaxSize() // adjust the modifier as needed
-                )
+                GlideImage(model = imageState, contentDescription = "null",
+                    modifier = Modifier.fillMaxSize())
+
             } else {
                 Box(
                     modifier = Modifier
