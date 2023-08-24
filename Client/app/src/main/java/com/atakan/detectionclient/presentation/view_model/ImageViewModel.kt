@@ -10,7 +10,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ImageViewModel @Inject constructor() : ViewModel() {
 
-    private val _imageLive = MutableLiveData<Bitmap>()
+    private val _imageLive = MutableLiveData<Bitmap>(null)
     val imageLive: LiveData<Bitmap> = _imageLive
 
     private val _isEmpty = MutableLiveData<Boolean>(false)
@@ -19,8 +19,14 @@ class ImageViewModel @Inject constructor() : ViewModel() {
     var action: String = ""
 
     fun refreshData(resource: Bitmap){
-        _imageLive.postValue(resource)
-        _isEmpty.postValue(true)
+        _imageLive.value = resource
+        _isEmpty.value = true
         action = "face"
+    }
+
+    fun clean(){
+        _imageLive.value = null
+        _isEmpty.value = false
+        action = ""
     }
 }

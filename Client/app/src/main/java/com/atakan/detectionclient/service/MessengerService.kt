@@ -1,16 +1,11 @@
 package com.atakan.detectionclient.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -19,14 +14,13 @@ import android.os.Message
 import android.os.Messenger
 import android.os.RemoteException
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atakan.detectionclient.common.Constants.ACTION
 import com.atakan.detectionclient.common.Constants.IMAGE
 import com.atakan.detectionclient.common.Constants.IMG_RECREATED
 import com.atakan.detectionclient.common.Constants.PACKAGE_NAME
 import com.atakan.detectionclient.data.ImageData
-import com.atakan.detectionclient.presentation.MainActivity
 import com.atakan.detectionclient.presentation.view_model.ImageViewModel
 import com.atakan.detectionclient.presentation.view_model.ServiceViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,6 +87,7 @@ class MessengerService : Service(){
 
     override fun onCreate() {
         super.onCreate()
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Foreground Service Channel"
             val descriptionText = "Foreground service channel description"
@@ -109,9 +104,10 @@ class MessengerService : Service(){
         // Start the service as a foreground service with a notification
         val notification = createNotification() // Implement the createNotification() method
         startForeground(2, notification)
+        */
         clickViewModel.isServiceConnected.observeForever(clickObserver)
-        doBindService()
     }
+    /*
     private fun createNotification(): Notification {
         // Create and return the notification for the foreground service
         // You can customize the notification as needed
@@ -136,13 +132,13 @@ class MessengerService : Service(){
             .build()
     }
 
+     */
+
 
     override fun onDestroy() {
         doUnbindService()
         //viewModel.imageLive.removeObserver()
         clickViewModel.isServiceConnected.removeObserver(clickObserver)
-        // Stop the foreground service and remove the notification
-        stopForeground(true)
         super.onDestroy()
     }
 
@@ -184,16 +180,15 @@ class MessengerService : Service(){
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        // Start the periodic API calls and send data if the service is bounded
-
+        doBindService()
         return START_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent) {
-        Log.d("Messenger", "Task Removed, Restarting Service")
-        val restartServiceIntent = Intent(applicationContext, this.javaClass)
-        restartServiceIntent.setPackage(packageName)
-        startService(restartServiceIntent)
+        Log.d("Messenger", "Task Removed, Cleaning...")
+        viewModel.clean()
+        viewModel = ImageViewModel()
+        stopSelf()
         super.onTaskRemoved(rootIntent)
     }
 

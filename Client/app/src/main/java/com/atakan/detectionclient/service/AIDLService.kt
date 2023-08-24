@@ -1,21 +1,14 @@
 package com.atakan.detectionclient.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
 import com.atakan.detectionclient.data.ImageData
-import com.atakan.detectionclient.presentation.MainActivity
 import com.atakan.detectionclient.presentation.view_model.ImageViewModel
 import com.atakan.detectionclient.presentation.view_model.ServiceViewModel
 import com.atakan.detectionserver.IIPCExample
@@ -58,6 +51,7 @@ class AIDLService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        connectToRemoteService()
         return START_STICKY
     }
 
@@ -92,6 +86,7 @@ class AIDLService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Foreground Service Channel"
             val descriptionText = "Foreground service channel description"
@@ -107,9 +102,10 @@ class AIDLService : Service() {
 
         val notification = createNotification()
         startForeground(1, notification)
+         */
         clickViewModel.isServiceConnected.observeForever(clickObserver)
-        connectToRemoteService()
     }
+    /*
     private fun createNotification(): Notification {
         val notificationTitle = "AIDL Service"
         val notificationText = "Service is running in the background"
@@ -131,19 +127,17 @@ class AIDLService : Service() {
             .build()
     }
 
+     */
+
     override fun onDestroy() {
         disconnectToRemoteService()
         clickViewModel.isServiceConnected.removeObserver(clickObserver)
-        // Stop the foreground service and remove the notification
-        stopForeground(true)
-        disconnectToRemoteService()
         super.onDestroy()
-
     }
 
     // Method to send data to the server application
     fun sendDataToServer() {
-        val resource: ImageData =
+        val resource =
             ImageData(image = viewModel.imageLive.value!!,
                 action = viewModel.action)
         Log.d("AIDL", "Sending Data")
