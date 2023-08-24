@@ -9,4 +9,5 @@ interface IIPCExample {
 
     /** Set displayed value of screen */
     void postVal(in Bitmap image, String action);
+
 }

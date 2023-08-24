@@ -2,6 +2,9 @@ package com.atakan.detectionclient.presentation
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.activity.ComponentActivity
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.exifinterface.media.ExifInterface
 import com.atakan.detectionclient.presentation.screen.main_screen.MainScreen
 import com.atakan.detectionclient.presentation.theme.MainClientTheme
 import com.atakan.detectionclient.presentation.view_model.ImageViewModel
@@ -42,6 +46,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun getExifOrientation(uri: Uri): Int {
+        var exifOrientation = 0
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            val exifInterface = ExifInterface(inputStream)
+            exifOrientation = exifInterface.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+        }
+        return exifOrientationToDegrees(exifOrientation)
+    }
+
+    private fun exifOrientationToDegrees(exifOrientation: Int): Int {
+        return when (exifOrientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            else -> 0
+        }
+    }
+
     private fun pickImageFromGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(intent, REQUEST_IMAGE_PICK)
@@ -51,8 +76,31 @@ class MainActivity : ComponentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == RESULT_OK && data != null) {
             val selectedImageUri = data.data
-            image = MediaStore.Images.Media.getBitmap(contentResolver, selectedImageUri)
-            viewModel.refreshData(image)
+            if(selectedImageUri != null){
+                val exifOrientation = getExifOrientation(selectedImageUri)
+                val rotatedImage = rotateImageIfNeeded(selectedImageUri, exifOrientation)
+                viewModel.refreshData(rotatedImage)
+            }
+            else{
+                println("No successful selection.")
+            }
+
         }
+    }
+    private fun rotateImageIfNeeded(uri: Uri, degrees: Int): Bitmap {
+        val inputStream = contentResolver.openInputStream(uri)
+        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+        val rotatedBitmap = rotateBitmap(originalBitmap, degrees)
+        inputStream?.close()
+
+        return rotatedBitmap
+    }
+
+    private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degrees.toFloat())
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 }

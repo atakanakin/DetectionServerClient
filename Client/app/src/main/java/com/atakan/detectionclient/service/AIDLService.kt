@@ -1,89 +1,51 @@
 package com.atakan.detectionclient.service
 
-/*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Observer
+import com.atakan.detectionclient.data.ImageData
+import com.atakan.detectionclient.presentation.MainActivity
+import com.atakan.detectionclient.presentation.view_model.ImageViewModel
+import com.atakan.detectionclient.presentation.view_model.ServiceViewModel
+import com.atakan.detectionserver.IIPCExample
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+
+
 @AndroidEntryPoint
 class AIDLService : Service() {
-    @Inject
-    lateinit var getCurrencyUseCase: GetCurrencyUseCase
+
     // Get viewModel instance
     @Inject
-    lateinit var viewModel: CurrencyViewModel
+    lateinit var viewModel: ImageViewModel
 
     @Inject
     lateinit var clickViewModel: ServiceViewModel
 
-    var sendMessage: Boolean = false
-
     var iRemoteService: IIPCExample? = null
 
-    private val clickObserver = Observer<Boolean> {
-        if(it){
-            if(sendMessage) {
-            }
-            else{
-                connectToRemoteService()
-            }
-        }
-        else{
-            if(sendMessage) {
-                disconnectToRemoteService()
-            } else{
-
-            }
-        }
-    }
-
-    val apiHandler = Handler()
-    private val apiRunnable = object : Runnable {
-        override fun run() {
-
-            // Make the API call and update viewModel with the response data
-            Log.d("AIDL", "Fetching data from API")
-
-            val job = CoroutineScope(Dispatchers.IO).launch {
-                getCurrencyUseCase.invoke().collect{
-                    when (it) {
-                        is Resource.Success -> {
-                            // Update viewModel with the fetched resource
-                            viewModel.refreshData(it)
-                        }
-                        is Resource.Loading -> {
-                            //
-                        }
-                        is Resource.Error -> {
-                            // Handle error state if needed
-                            println("Error: ${it.message}")
-                        }
-                    }
-                }
-
-            }
-
-            // Make sure to cancel the coroutine when the service is stopped
-            job.invokeOnCompletion {
-                if (it != null) {
-                    Log.e("AIDL Error","Coroutine completed with an exception: ${it.message}")
-                } else {
-                    //
-                }
-            }
-
-            if(sendMessage){
-                sendDataToServer()
-            }
-
-            // Repeat this process every minute
-            apiHandler.postDelayed(this, 5000)
+    private val clickObserver = Observer<Int> {
+        if(it > 0){
+            sendDataToServer()
         }
     }
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             // Gets an instance of the AIDL interface
+            Log.d("AIDL", "Connected")
             iRemoteService = IIPCExample.Stub.asInterface(service)
-            if(sendMessage) {
-                sendDataToServer()
-            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -91,21 +53,17 @@ class AIDLService : Service() {
         }
     }
 
-    // apiHandler.removeCallbacks(apiRunnable)
-
-
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        apiHandler.post(apiRunnable)
         return START_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
+        connectToRemoteService()
         Log.d("AIDL", "Task Removed, Restarting Service")
-        apiHandler.removeCallbacks(apiRunnable)
         val restartServiceIntent = Intent(applicationContext, this.javaClass)
         restartServiceIntent.setPackage(packageName)
         startService(restartServiceIntent)
@@ -113,9 +71,8 @@ class AIDLService : Service() {
     }
 
     private fun connectToRemoteService() {
-        Log.d("AIDL", "Connected")
+        Log.d("AIDL", "Connected lesgo")
         val intent = Intent("aidl")
-        sendMessage = true
         val pack = IIPCExample::class.java.`package`
         pack?.let {
             intent.setPackage(pack.name)
@@ -123,16 +80,13 @@ class AIDLService : Service() {
                 intent, connection, Context.BIND_AUTO_CREATE
             )
         }
-        sendDataToServer()
     }
 
     private fun disconnectToRemoteService() {
         try {
-            sendMessage = false
             unbindService(connection)
         }catch (e : Exception){
             Log.w("AIDLError", e.toString())
-            sendMessage = false
         }
     }
 
@@ -154,6 +108,7 @@ class AIDLService : Service() {
         val notification = createNotification()
         startForeground(1, notification)
         clickViewModel.isServiceConnected.observeForever(clickObserver)
+        connectToRemoteService()
     }
     private fun createNotification(): Notification {
         val notificationTitle = "AIDL Service"
@@ -177,50 +132,26 @@ class AIDLService : Service() {
     }
 
     override fun onDestroy() {
-        apiHandler.removeCallbacks(apiRunnable)
         disconnectToRemoteService()
         clickViewModel.isServiceConnected.removeObserver(clickObserver)
         // Stop the foreground service and remove the notification
         stopForeground(true)
+        disconnectToRemoteService()
         super.onDestroy()
 
     }
 
     // Method to send data to the server application
     fun sendDataToServer() {
-        Log.d("AIDL", "isHEre")
-        when (val resource: Resource<Currency>? = viewModel.currencyLiveData.value) {
-            is Resource.Success -> {
-                val currencyData: Currency = resource.data!!
-                Log.d("AIDL", "Sending Data")
-                iRemoteService?.postVal(
-                    applicationContext.packageName,
-                    Process.myPid(),
-                    currencyData.bpi.USD.code,
-                    currencyData.bpi.EUR.code,
-                    currencyData.bpi.GBP.code,
-                    currencyData.bpi.USD.rate_float.toDouble(),
-                    currencyData.bpi.EUR.rate_float.toDouble(),
-                    currencyData.bpi.GBP.rate_float.toDouble(),
-                    currencyData.time.updated
-                )
-                /*val serverClass = Serverprop(iRemoteService?.pid.toString(), iRemoteService?.connectionCount.toString())
-                serverprop.serverData.postValue(serverClass)
-                 */
-            }
-            is Resource.Loading -> {
-                Log.d("AIDL", "Loading")
-            }
+        val resource: ImageData =
+            ImageData(image = viewModel.imageLive.value!!,
+                action = viewModel.action)
+        Log.d("AIDL", "Sending Data")
+        iRemoteService?.postVal(
+            resource.image,
+            resource.action
+        )
 
-            is Resource.Error -> {
-                Log.w("AIDL", "Unexpected error occurred.")
-            }
-            else -> {
-                Log.e("AIDL", "Null")
-            }
-        }
+        viewModel.refreshData(iRemoteService?.image!!)
     }
 }
-
-
- */

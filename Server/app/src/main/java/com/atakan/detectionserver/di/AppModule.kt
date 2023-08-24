@@ -1,6 +1,6 @@
 package com.atakan.detectionserver.di
 
-import com.atakan.detectionserver.presentation.ImageViewModel
+import com.atakan.detectionserver.presentation.viewmodel.ImageViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,5 +16,4 @@ object AppModule {
     fun provideViewModel() : ImageViewModel {
         return ImageViewModel()
     }
-
 }

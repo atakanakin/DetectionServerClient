@@ -34,9 +34,16 @@ object ImageUtils {
 
         for(face in faces){
             val boundingBox = face.boundingBox
-            val cropped = cropBitmap(originalBitmap = finalBitmap, bound = boundingBox)
+            val adjustedRect = Rect(
+                boundingBox.left.coerceAtLeast(0),
+                boundingBox.top.coerceAtLeast(0),
+                boundingBox.right.coerceAtLeast(0),
+                boundingBox.bottom.coerceAtLeast(0)
+            )
+
+            val cropped = cropBitmap(originalBitmap = finalBitmap, bound = adjustedRect)
             val blurred = blurPart(context, cropped)
-            finalBitmap = overlayBitmap(originalBitmap = finalBitmap, blurred = blurred, region = boundingBox)
+            finalBitmap = overlayBitmap(originalBitmap = finalBitmap, blurred = blurred, region = adjustedRect)
         }
 
         return finalBitmap

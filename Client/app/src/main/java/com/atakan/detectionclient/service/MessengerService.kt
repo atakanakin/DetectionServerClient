@@ -30,8 +30,6 @@ import com.atakan.detectionclient.presentation.MainActivity
 import com.atakan.detectionclient.presentation.view_model.ImageViewModel
 import com.atakan.detectionclient.presentation.view_model.ServiceViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 
@@ -71,8 +69,6 @@ class MessengerService : Service(){
             // Update UI with remote process info
 
             val bundle = msg.data
-            println("came")
-            println(bundle.getString(ACTION))
 
             val modifiedImage = bundle.getParcelable<Bitmap>(IMG_RECREATED)
             if (modifiedImage != null) {
@@ -81,13 +77,6 @@ class MessengerService : Service(){
                 // Handle the case where modifiedImage is null
                 println("null came")
             }
-
-
-
-            //val serverClass = Serverprop(bundle.getInt(PID).toString(), bundle.getInt(
-            //    CONNECTION_COUNT).toString())
-
-            //serverprop.serverData.postValue(serverClass)
         }
     }
 

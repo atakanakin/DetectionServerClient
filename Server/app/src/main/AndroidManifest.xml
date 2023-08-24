@@ -36,13 +36,6 @@
                 <action android:name="messenger" />
             </intent-filter>
         </service>
-        <receiver android:name="com.atakan.detectionserver.service.BroadcastReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.atakan.mainclient" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
