@@ -14,6 +14,7 @@ import android.os.Message
 import android.os.Messenger
 import android.os.RemoteException
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atakan.detectionclient.common.Constants.ACTION
@@ -154,6 +155,7 @@ class MessengerService : Service(){
             Log.d("Messenger", "SUCCESSFULLY connected")
         }catch (e: Exception){
             Log.e("Messenger", "Error")
+            Toast.makeText(applicationContext, "Open the server app!", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
 
@@ -198,8 +200,8 @@ class MessengerService : Service(){
             doUnbindService()
             doBindService()
             Log.e("Messenger", "Server service connection lost. Cannot send message.")
-            Log.d("Messenger", "Trying to reconnect.")
-            return
+            Log.w("Messenger", "Trying to reconnect.")
+            Toast.makeText(applicationContext, "Trying to reconnect... Click Send again", Toast.LENGTH_SHORT).show()
         }
         val message = Message.obtain(handler)
         val bundle = Bundle()
