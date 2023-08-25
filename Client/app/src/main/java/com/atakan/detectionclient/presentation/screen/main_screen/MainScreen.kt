@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,16 +51,26 @@ fun MainScreen(
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
-
     val context = LocalContext.current
-
-    val bitmap =  remember {
-        mutableStateOf<Bitmap?>(null)
-    }
 
     val launcher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
+    }
+
+    // Observe changes to imageUri and process the image when it changes
+    LaunchedEffect(imageUri) {
+        if (imageUri != null) {
+            if (Build.VERSION.SDK_INT < 28) {
+                val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+                viewModel.refreshData(bitmap)
+
+            } else {
+                val source = ImageDecoder.createSource(context.contentResolver, imageUri!!)
+                val bitmap = ImageDecoder.decodeBitmap(source)
+                viewModel.refreshData(bitmap)
+            }
+        }
     }
 
     Column(
@@ -70,26 +81,17 @@ fun MainScreen(
         //AIDLServiceComposable(context = context)
         MessengerServiceComposable(context = context)
         Box(modifier = Modifier.height(600.dp)){
-            imageUri?.let {
-                if (Build.VERSION.SDK_INT < 28) {
-                    bitmap.value = MediaStore.Images
-                        .Media.getBitmap(context.contentResolver,it)
 
-                } else {
-                    val source = ImageDecoder
-                        .createSource(context.contentResolver,it)
-                    bitmap.value = ImageDecoder.decodeBitmap(source)
-                }
-                if(bitmap.value != null){
-                    Image(bitmap.value!!.asImageBitmap(), contentDescription = "null",
-                        modifier = Modifier.fillMaxSize())
-                }
-                else{
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color.Black)){
-                        Text(text = "No Image", modifier = Modifier.align(Alignment.Center), style = TextStyle(color = Color.White))
-                    }
+            if(emptyState == true){
+                Image(
+                    imageState!!.asImageBitmap(), contentDescription = "null",
+                    modifier = Modifier.fillMaxSize())
+            }
+            else{
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.Black)){
+                    Text(text = "No Image", modifier = Modifier.align(Alignment.Center), style = TextStyle(color = Color.White))
                 }
             }
         }

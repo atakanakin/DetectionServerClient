@@ -49,7 +49,6 @@ class ServerService : Service() {
                 action = receivedBundle.getString(ACTION)!!,
                 method = "Messenger"
             )
-            viewModel.refreshData(incData.image)
 
             // The service can save the msg.replyTo object as a local variable
             // so that it can send a message to the client at any time
@@ -80,10 +79,8 @@ class ServerService : Service() {
 
         override fun getImage(): Bitmap {
             runBlocking {
-                println("inside")
                 mutableBitmap = applyBlur(applicationContext, incData.image , faceDetector())
                 viewModel.refreshData(mutableBitmap)
-                println("inside2")
             }
             return mutableBitmap
         }
