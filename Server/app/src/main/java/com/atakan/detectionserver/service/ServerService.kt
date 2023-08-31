@@ -50,21 +50,25 @@ class ServerService : Service() {
                 method = "Messenger"
             )
 
+            Log.d("Messenger", "Package Received.")
+
             // The service can save the msg.replyTo object as a local variable
             // so that it can send a message to the client at any time
             val message = Message.obtain(this@IncomingHandler, 0)
             val bundle = Bundle()
 
+
             runBlocking {
                 mutableBitmap = applyBlur(applicationContext, incData.image, faceDetector())
-                viewModel.refreshData(mutableBitmap)
             }
+
+            viewModel.refreshData(mutableBitmap)
 
             bundle.putParcelable(IMG_RECREATED, mutableBitmap)
             message.data = bundle
             msgx.replyTo.send(message)
 
-            Log.d("Messenger", "Package Received.")
+            Log.d("Messenger", "Package Sent.")
         }
     }
 

@@ -1,7 +1,5 @@
 package com.atakan.detectionclient.presentation.screen.main_screen
 
-import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -13,14 +11,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,7 +35,6 @@ import com.atakan.detectionclient.presentation.screen.messenger.MessengerService
 import com.atakan.detectionclient.presentation.view_model.ImageViewModel
 import com.atakan.detectionclient.presentation.view_model.ServiceViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 
 @RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -53,8 +51,10 @@ fun MainScreen(
     }
     val context = LocalContext.current
 
-    val launcher = rememberLauncherForActivityResult(contract =
-    ActivityResultContracts.GetContent()) { uri: Uri? ->
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
         imageUri = uri
     }
 
@@ -74,37 +74,44 @@ fun MainScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Choose service
         //MessengerServiceComposable(context = context)
         //AIDLServiceComposable(context = context)
         MessengerServiceComposable(context = context)
-        Box(modifier = Modifier.height(600.dp)){
+        Box(modifier = Modifier.height(600.dp)) {
 
-            if(emptyState == true){
+            if (emptyState == true) {
                 Image(
                     imageState!!.asImageBitmap(), contentDescription = "null",
-                    modifier = Modifier.fillMaxSize())
-            }
-            else{
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = Color.Black)){
-                    Text(text = "No Image", modifier = Modifier.align(Alignment.Center), style = TextStyle(color = Color.White))
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.Black)
+                ) {
+                    Text(
+                        text = "No Image",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = TextStyle(color = Color.White)
+                    )
                 }
             }
         }
+        Spacer(modifier = Modifier.height(40.dp))
         Button(onClick = {
             launcher.launch("image/*")
         }) {
             Text("Choose")
         }
         Button(onClick = {
-            if(emptyState!!){
+            if (emptyState!!) {
                 serviceViewModel.updateCount()
-            }
-            else{
+            } else {
                 println("No Image Selected")
             }
         }) {
