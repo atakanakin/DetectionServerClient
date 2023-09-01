@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -15,8 +16,8 @@ import android.os.Messenger
 import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.Observer
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.atakan.detectionclient.common.Constants.ACTION
 import com.atakan.detectionclient.common.Constants.IMAGE
 import com.atakan.detectionclient.common.Constants.IMG_RECREATED
@@ -29,7 +30,13 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MessengerService : Service(){
+class MessengerService : Service() {
+    val i = Intent().apply {
+        this.setClassName(
+            "com.atakan.detectionserver",
+            "com.atakan.detectionserver.service.ServerService"
+        )
+    }
 
     @Inject
     lateinit var viewModel: ImageViewModel
@@ -70,13 +77,13 @@ class MessengerService : Service(){
                 viewModel.refreshData(modifiedImage)
             } else {
                 // Handle the case where modifiedImage is null
-                println("null came")
+                Log.e("Null Pointer Error", "Null")
             }
         }
     }
 
     private val clickObserver = Observer<Int> {
-        if(it > 0){
+        if (it > 0) {
             sendMessageToServer()
         }
     }
@@ -86,6 +93,7 @@ class MessengerService : Service(){
         return null
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         /*
@@ -107,6 +115,12 @@ class MessengerService : Service(){
         startForeground(2, notification)
         */
         clickViewModel.isServiceConnected.observeForever(clickObserver)
+        try {
+            startForegroundService(i)
+        } catch (e: Exception) {
+            Log.e("Server App", e.stackTrace.toString())
+        }
+
     }
     /*
     private fun createNotification(): Notification {
@@ -140,20 +154,21 @@ class MessengerService : Service(){
         doUnbindService()
         //viewModel.imageLive.removeObserver()
         clickViewModel.isServiceConnected.removeObserver(clickObserver)
+        stopService(i)
         super.onDestroy()
     }
 
     // Start service according to the button
-    private fun doBindService(){
+    private fun doBindService() {
         // Start the server service
-        try{
+        try {
             Intent("messenger").also { intent ->
                 intent.`package` = "com.atakan.detectionserver"
                 startService(intent)
                 bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
             }
             Log.d("Messenger", "SUCCESSFULLY connected")
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.e("Messenger", "Error")
             Toast.makeText(applicationContext, "Open the server app!", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
@@ -162,20 +177,19 @@ class MessengerService : Service(){
     }
 
     // Stop service activity according to the button activity
-    private fun doUnbindService(){
+    private fun doUnbindService() {
         try {
             unbindService(serviceConnection)
             Log.d("Messenger", "SUCCESSFULLY disconnected")
 
-        }catch (e : Exception)
-        {
+        } catch (e: Exception) {
             Log.w("Messenger", e.toString())
         }
 
 
         try {
             unbindService(serviceConnection)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             Log.e("Messenger", "Failed to disconnect.")
         }
 
@@ -194,14 +208,18 @@ class MessengerService : Service(){
         super.onTaskRemoved(rootIntent)
     }
 
-    private fun sendMessageToServer(){
+    private fun sendMessageToServer() {
         if (serverMessenger == null) {
             // Server service connection is lost or not available
             doUnbindService()
             doBindService()
             Log.e("Messenger", "Server service connection lost. Cannot send message.")
             Log.w("Messenger", "Trying to reconnect.")
-            Toast.makeText(applicationContext, "Trying to reconnect... Click Send again", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                applicationContext,
+                "Trying to reconnect... Click Send again",
+                Toast.LENGTH_SHORT
+            ).show()
         }
         val message = Message.obtain(handler)
         val bundle = Bundle()

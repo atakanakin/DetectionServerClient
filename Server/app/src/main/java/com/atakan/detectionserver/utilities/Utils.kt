@@ -31,14 +31,16 @@ object ImageUtils {
 
     fun applyBlur(context: Context, image: Bitmap, faces: List<Face>): Bitmap{
         var finalBitmap = image.copy(image.config, true)
+        val bitmapWidth = finalBitmap.width
+        val bitmapHeight = finalBitmap.height
 
         for(face in faces){
             val boundingBox = face.boundingBox
             val adjustedRect = Rect(
-                boundingBox.left.coerceAtLeast(0),
-                boundingBox.top.coerceAtLeast(0),
-                boundingBox.right.coerceAtLeast(0),
-                boundingBox.bottom.coerceAtLeast(0)
+                boundingBox.left.coerceIn(0, bitmapWidth - 1),
+                boundingBox.top.coerceIn(0, bitmapHeight - 1),
+                boundingBox.right.coerceIn(0, bitmapWidth - 1),
+                boundingBox.bottom.coerceIn(0, bitmapHeight - 1)
             )
 
             val cropped = cropBitmap(originalBitmap = finalBitmap, bound = adjustedRect)
